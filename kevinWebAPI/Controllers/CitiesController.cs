@@ -1,19 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 
 namespace kevinWebAPI.Contollers
 {
+    [Route("api/cities")]
     public class CitiesController : Controller
     {
-        public JsonResult GetCities()
+        [HttpGet()]
+        public IActionResult GetCities()
 
         {
-            return new JsonResult(new List<object>()
+            return Ok(CitiesDataStore.Current.Cities);
+        }
+        [HttpGet("{id}")]
+        public IActionResult GetACity(int id)
+        {
+            var cityReturn = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == id);
+            if(cityReturn == null)
             {
-                new { id=1, Name="New york"},
-                new {id = 2, Name="Nigeria"}
-            });
+                return NotFound();
+            }
+            return Ok(cityReturn);
+          //  return new JsonResult(CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == id));
         }
     }
 }

@@ -27,6 +27,7 @@ namespace kevinWebAPI
             }
 
             app.UseMvc();
+            app.UseStatusCodePages();
             //app.Run(async (context) =>
             //{
             //    await context.Response.WriteAsync("Hello World!");
