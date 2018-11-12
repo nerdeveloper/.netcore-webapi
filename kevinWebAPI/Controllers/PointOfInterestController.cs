@@ -72,6 +72,43 @@ namespace kevinWebAPI.Controllers
 
             return CreatedAtRoute(routeName: "GetPointOfInterest", routeValues:new { cityId = cityId, id = finalPointOfInterest.Id}, value: finalPointOfInterest);
         }
-    }
-}
-;
+
+
+        [HttpPut("{cityId}/pointofinterests/{id}")]
+        public IActionResult UpdatePointOfInterest(int cityId, int id,
+               [FromBody] PointOfInterestForUpdate pointOfInterests)
+        {
+
+            if (pointOfInterests == null)
+            {
+                return BadRequest();
+            }
+            if (pointOfInterests.Description == pointOfInterests.Name)
+            {
+                ModelState.AddModelError("Description", "The provided description should be different from the name.");
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+
+            if (city == null)
+            {
+                return NotFound();
+            }
+            var pointOfInterestFromStore = city.PointOfInterests.FirstOrDefault(p => p.Id == id);
+
+            if(pointOfInterestFromStore == null)
+            {
+                return NotFound();
+            }
+
+            pointOfInterestFromStore.Name = pointOfInterests.Name;
+            pointOfInterestFromStore.Description = pointOfInterests.Description;
+
+            return NoContent();
+
+        }
+        }
+};
