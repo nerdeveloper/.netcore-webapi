@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using kevinWebAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace kevinWebAPI.Controllers
@@ -7,7 +8,7 @@ namespace kevinWebAPI.Controllers
     [Route("api/cities")]
     public class PointOfInterestController : Controller
     {
-        [HttpGet("{cityId}/pointofinterests")]
+        [HttpGet("{cityId}/pointofinterests", Name = "GetPointOfInterest")]
         public IActionResult GetPointOfInterest(int cityId)
         {
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
@@ -33,6 +34,43 @@ namespace kevinWebAPI.Controllers
                 return NotFound();
             }
             return Ok(pointOfInterest);
+        }
+
+        [HttpPost("{cityId}/pointofinterests")]
+        public IActionResult CreatePointOfInterest(int cityId,
+                                                   [FromBody] PointOfInterestForCreation pointOfInterest)
+        {
+            if (pointOfInterest == null)
+            {
+                return BadRequest();
+            }
+            if( pointOfInterest.Description == pointOfInterest.Name)
+            {
+                ModelState.AddModelError("Description", "The provided description should be different from the name.");
+            }
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+
+            if(city == null) 
+            {
+                return NotFound();
+            }
+
+            var maxPointOfInterestId = CitiesDataStore.Current.Cities.SelectMany(c => c.PointOfInterests).Max(p => p.Id);
+
+            var finalPointOfInterest = new PointOfInterest()
+            {
+                Id = ++maxPointOfInterestId,
+                Name = pointOfInterest.Name,
+                Description = pointOfInterest.Description
+
+                };
+                      city.PointOfInterests.Add(finalPointOfInterest);
+
+            return CreatedAtRoute(routeName: "GetPointOfInterest", routeValues:new { cityId = cityId, id = finalPointOfInterest.Id}, value: finalPointOfInterest);
         }
     }
 }
