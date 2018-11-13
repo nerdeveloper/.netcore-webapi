@@ -9,7 +9,7 @@ namespace kevinWebAPI.Models
         [MaxLength(20)]
         public string Name { get; set; }
 
-        [MaxLength(200)]
+        [MaxLength(2)]
         public string Description { get; set; }
     }
 }

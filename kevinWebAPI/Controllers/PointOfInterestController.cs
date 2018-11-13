@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using kevinWebAPI.Models;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace kevinWebAPI.Controllers
@@ -44,17 +45,17 @@ namespace kevinWebAPI.Controllers
             {
                 return BadRequest();
             }
-            if( pointOfInterest.Description == pointOfInterest.Name)
+            if (pointOfInterest.Description == pointOfInterest.Name)
             {
                 ModelState.AddModelError("Description", "The provided description should be different from the name.");
             }
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
-            if(city == null) 
+            if (city == null)
             {
                 return NotFound();
             }
@@ -67,10 +68,10 @@ namespace kevinWebAPI.Controllers
                 Name = pointOfInterest.Name,
                 Description = pointOfInterest.Description
 
-                };
-                      city.PointOfInterests.Add(finalPointOfInterest);
+            };
+            city.PointOfInterests.Add(finalPointOfInterest);
 
-            return CreatedAtRoute(routeName: "GetPointOfInterest", routeValues:new { cityId = cityId, id = finalPointOfInterest.Id}, value: finalPointOfInterest);
+            return CreatedAtRoute(routeName: "GetPointOfInterest", routeValues: new { cityId = cityId, id = finalPointOfInterest.Id }, value: finalPointOfInterest);
         }
 
 
@@ -99,7 +100,7 @@ namespace kevinWebAPI.Controllers
             }
             var pointOfInterestFromStore = city.PointOfInterests.FirstOrDefault(p => p.Id == id);
 
-            if(pointOfInterestFromStore == null)
+            if (pointOfInterestFromStore == null)
             {
                 return NotFound();
             }
@@ -110,5 +111,71 @@ namespace kevinWebAPI.Controllers
             return NoContent();
 
         }
+        [HttpPatch("{cityId}/pointofinterests/{id}")]
+        public IActionResult PartiallyUpdatePointOfInterest(int cityId, int id,
+                                                            [FromBody] JsonPatchDocument<PointOfInterestForUpdate> patchDoc)
+        {
+            if (patchDoc == null)
+            {
+                return BadRequest();
+            }
+            if (CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == id) == null)
+            {
+                return NotFound();
+            }
+
+            var pointOfInterestFromStore = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == id).PointOfInterests.FirstOrDefault(c => c.Id == id);
+            if (pointOfInterestFromStore == null)
+            {
+                return NotFound();
+            }
+            var pointOfInterestoPatch = new PointOfInterestForUpdate()
+            {
+                Name = pointOfInterestFromStore.Name,
+                Description = pointOfInterestFromStore.Description
+            };
+            patchDoc.ApplyTo(pointOfInterestoPatch, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            };
+
+            if (pointOfInterestoPatch.Description == pointOfInterestoPatch.Name)
+            {
+                ModelState.AddModelError("Description", "The provided description should be different from the name.");
+            }
+
+            TryValidateModel(pointOfInterestoPatch);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            pointOfInterestFromStore.Name = pointOfInterestoPatch.Name;
+            pointOfInterestFromStore.Description = pointOfInterestoPatch.Description;
+
+            return NoContent();
         }
-};
+
+        [HttpDelete("{cityId}/pointofinterests/{id}")]
+        public IActionResult DeletePointOfInterest (int cityId, int id)
+        {
+            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == id);
+            if(city == null)
+            {
+                return NotFound();
+            }
+            var pointOfInterestFromStore = city.PointOfInterests.FirstOrDefault(f => f.Id == id);
+            if (pointOfInterestFromStore == null)
+            {
+                return NotFound();
+            }
+            city.PointOfInterests.Remove(pointOfInterestFromStore);
+          
+            return NoContent();
+
+        }
+    }
+}
