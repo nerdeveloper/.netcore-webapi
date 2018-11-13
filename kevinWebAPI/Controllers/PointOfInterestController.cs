@@ -1,14 +1,23 @@
 ﻿using System;
 using System.Linq;
+using kevinWebAPI.Services;
 using kevinWebAPI.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace kevinWebAPI.Controllers
 {
     [Route("api/cities")]
     public class PointOfInterestController : Controller
     {
+        private ILogger<PointOfInterestController> _logger;
+        private IMailService _mailService;
+
+        public PointOfInterestController(ILogger<PointOfInterestController> logger)
+        {
+            _logger = logger;
+        }
         [HttpGet("{cityId}/pointofinterests", Name = "GetPointOfInterest")]
         public IActionResult GetPointOfInterest(int cityId)
         {
@@ -24,22 +33,33 @@ namespace kevinWebAPI.Controllers
         [HttpGet("{cityId}/pointofinterests/{id}")]
         public IActionResult GetEachPointOfInterest(int cityId, int id)
         {
-            var PointOI = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
-            if (PointOI == null)
+            try
             {
-                return NotFound();
+
+                var PointOI = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+                if (PointOI == null)
+                {
+                    _logger.LogInformation($"City with id {cityId} was not found in the point of interest");
+                    return NotFound();
+                }
+                var pointOfInterest = PointOI.PointOfInterests.FirstOrDefault(p => p.Id == id);
+                if (pointOfInterest == null)
+                {
+                    return NotFound();
+                }
+                return Ok(pointOfInterest);
             }
-            var pointOfInterest = PointOI.PointOfInterests.FirstOrDefault(p => p.Id == id);
-            if (pointOfInterest == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                _logger.LogInformation($"Exception while getting points of interest for the city {cityId}.", ex);
+                return StatusCode(500, "A problem while getting data from the server");
             }
-            return Ok(pointOfInterest);
         }
+
 
         [HttpPost("{cityId}/pointofinterests")]
         public IActionResult CreatePointOfInterest(int cityId,
-                                                   [FromBody] PointOfInterestForCreation pointOfInterest)
+                 [FromBody] PointOfInterestForCreation pointOfInterest)
         {
             if (pointOfInterest == null)
             {
@@ -173,7 +193,9 @@ namespace kevinWebAPI.Controllers
                 return NotFound();
             }
             city.PointOfInterests.Remove(pointOfInterestFromStore);
-          
+            _mailService.Send("Point of interest deleted.",
+                   $"Point of interest {pointOfInterestFromStore.Name} with id {pointOfInterestFromStore.Id} was deleted.");
+
             return NoContent();
 
         }
