@@ -53,7 +53,8 @@ namespace kevinWebAPI
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory,
+                              CityInfoContext cityInfoContext )
         {
             // No need to add these loggers in ASP.NET Core 2.0: the call to WebHost.CreateDefaultBuilder(args) 
             // in the Program class takes care of that.
@@ -72,6 +73,7 @@ namespace kevinWebAPI
             {
                 app.UseExceptionHandler();
             }
+            cityInfoContext.EnsureSeedDataForContext();
 
             app.UseStatusCodePages();
 
