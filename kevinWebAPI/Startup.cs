@@ -10,12 +10,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using NLog.Extensions.Logging;
-using kevinWebAPI.Services;
 using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
 using kevinWebAPI.Entities;
+using Microsoft.EntityFrameworkCore;
+using kevinWebAPI.Services;
+using kevinWebAPI.Models;
 
 namespace kevinWebAPI
+
 {
     public class Startup
     {
@@ -41,20 +43,21 @@ namespace kevinWebAPI
             //        castedResolver.NamingStrategy = null;
             //    }
             //});
-
+               
 #if DEBUG
             services.AddTransient<IMailService, LocalMailService>();
-            services.AddDbContext<CityInfoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("kevinWebAPI")));
 #else
 
-            services.AddTransient<IMailService, CloudMailService>();
 #endif
+            services.AddDbContext<CityInfoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("kevinWebAPI")));
 
+
+            services.AddScoped<ICityInfoRepository, CityInfoRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory,
-                              CityInfoContext cityInfoContext )
+            CityInfoContext cityInfoContext)
         {
             // No need to add these loggers in ASP.NET Core 2.0: the call to WebHost.CreateDefaultBuilder(args) 
             // in the Program class takes care of that.
@@ -73,9 +76,20 @@ namespace kevinWebAPI
             {
                 app.UseExceptionHandler();
             }
+
             cityInfoContext.EnsureSeedDataForContext();
 
             app.UseStatusCodePages();
+
+            AutoMapper.Mapper.Initialize(cfg =>
+            {
+                cfg.CreateMap<City, CityWithoutPointsOfInterestDto>();
+                cfg.CreateMap<City, CityDto>();
+                cfg.CreateMap<Models.PointOfInterest,Entities.PointOfInterest>();
+                cfg.CreateMap<PointOfInterestForCreation, Entities.PointOfInterest>();
+                cfg.CreateMap<PointOfInterestForUpdate, Entities.PointOfInterest>();
+                cfg.CreateMap<Entities.PointOfInterest, PointOfInterestForUpdate>();
+            });
 
             app.UseMvc();
 

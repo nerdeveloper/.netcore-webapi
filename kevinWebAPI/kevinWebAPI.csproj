@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="7.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0-preview3-35497" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0-preview3-35497" />
@@ -25,5 +26,11 @@
 
   <ItemGroup>
     <Compile Remove="Controllers\PointsOfInterestController.cs" />
+    <Compile Remove="Models\PointOfInterestForUpdateDto.cs" />
+    <Compile Remove="Models\PointOfInterestForCreationDto.cs" />
+    <Compile Remove="Models\PointOfInterestDto.cs" />
+    <Compile Remove="Services\ICityInfoRepository copy.cs" />
+    <Compile Remove="Services\ICityInfoRepository.cs" />
+    <Compile Remove="Services\CityInfoRepository.cs" />
   </ItemGroup>
 </Project>

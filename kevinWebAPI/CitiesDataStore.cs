@@ -7,18 +7,18 @@ namespace kevinWebAPI
     public class CitiesDataStore
     {
         public static CitiesDataStore Current { get; } = new CitiesDataStore();
-        public List<CityInfo> Cities { get; set;  }
+        public List<CityDto> Cities { get; set;  }
 
         public CitiesDataStore()
         {
-            Cities = new List<CityInfo>()
+            Cities = new List<CityDto>()
             {
-                new CityInfo()
+                new CityDto()
                 {
                     Id  = 1,
                     Name = "New york city",
                     Description = "the one with the finest",
-                    PointOfInterests = new List<PointOfInterest>()
+                    PointsOfInterest = new List<PointOfInterest>()
                     {
                         new PointOfInterest()
 
@@ -43,13 +43,13 @@ namespace kevinWebAPI
                         }
                     }
                 },
-                 new CityInfo()
+                new CityDto()
                 {
                     Id  = 2,
                     Name = "Atlanta",
                     Description = "World largest Market"
                 },
-                 new CityInfo()
+                new CityDto()
                 {
                     Id  = 3,
                     Name = "Alabama",
