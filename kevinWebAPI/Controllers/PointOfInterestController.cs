@@ -21,8 +21,7 @@ namespace kevinWebAPI.Controllers
 
 
         public PointOfInterestController(ILogger<PointOfInterestController> logger,
-            IMailService mailService,
-            ICityInfoRepository cityInfoRepository)
+            IMailService mailService, ICityInfoRepository cityInfoRepository)
         {
             _logger = logger;
             _mailService = mailService;

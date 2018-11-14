@@ -30,7 +30,6 @@
     <Compile Remove="Models\PointOfInterestForCreationDto.cs" />
     <Compile Remove="Models\PointOfInterestDto.cs" />
     <Compile Remove="Services\ICityInfoRepository copy.cs" />
-    <Compile Remove="Services\ICityInfoRepository.cs" />
     <Compile Remove="Services\CityInfoRepository.cs" />
   </ItemGroup>
 </Project>
