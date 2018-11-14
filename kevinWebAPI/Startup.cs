@@ -12,6 +12,8 @@ using Newtonsoft.Json.Serialization;
 using NLog.Extensions.Logging;
 using kevinWebAPI.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
+using kevinWebAPI.Entities;
 
 namespace kevinWebAPI
 {
@@ -42,7 +44,9 @@ namespace kevinWebAPI
 
 #if DEBUG
             services.AddTransient<IMailService, LocalMailService>();
+            services.AddDbContext<CityInfoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("kevinWebAPI")));
 #else
+
             services.AddTransient<IMailService, CloudMailService>();
 #endif
 
